@@ -2,6 +2,8 @@
 
 This python module provides a convenience API for SQVD. REST API documentation is included.
 
+> TODO: Remove import url paramter (assets assigned to study should always imported)
+
 ## Installation
 pySQD requires the `request` module. Compatible with python 2.7 and 3.0+
 
