@@ -111,8 +111,10 @@ class SQVD(object):
                 'password': self.password,
                 'hashed': True
             })
-        except Exception as e:
-            print('EXCEPTION {}'.format(str(e)))
+        except ConnectionError:
+            print('ERROR: Cannot connect to {} '.format(self.url))
+            return
+        except:
             raise
 
         try:
