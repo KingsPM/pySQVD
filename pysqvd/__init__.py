@@ -3,6 +3,7 @@ from __future__ import print_function
 from six import string_types
 from six.moves.urllib.parse import urlencode
 import requests
+from requests import ConnectionError
 import hashlib
 import json
 from datetime import datetime, timedelta
