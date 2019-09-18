@@ -9,7 +9,6 @@ from datetime import datetime, timedelta
 import os
 import time
 import re
-import sys
 
 __author__ = "David Brawand"
 __credits__ = ['David Brawand']
@@ -113,7 +112,7 @@ class SQVD(object):
                 'hashed': True
             })
         except Exception as e:
-            print >> sys.stderr, 'EXCEPTION', e
+            print('EXCEPTION {}'.format(str(e)))
             raise
 
         try:
