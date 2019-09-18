@@ -105,11 +105,16 @@ class SQVD(object):
             self.password = hashlib.sha256(
                 password.encode('utf-8')).hexdigest()
 
-        r = requests.post(self.url+'/login', data={
-            'username': self.username,
-            'password': self.password,
-            'hashed': True
-        })
+        try:
+            r = requests.post(self.url+'/login', data={
+                'username': self.username,
+                'password': self.password,
+                'hashed': True
+            })
+        except Exception as e:
+            print >> sys.stderr, 'EXCEPTION', e
+            raise
+
         try:
             self._checkResponse(r)
             auth = r.json()['data']
