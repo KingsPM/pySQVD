@@ -1,4 +1,4 @@
-# pySQVD - v1.0.0
+# pySQVD
 
 This python module provides a convenience API for SQVD. REST API documentation is included.
 
