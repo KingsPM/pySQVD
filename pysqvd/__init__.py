@@ -82,8 +82,7 @@ class SQVD(object):
         self.password = hashlib.sha256(password.encode('utf-8')).hexdigest()
 
     def __enter__(self):
-        assert self.login()
-        return self
+        return self.login()
 
     def __exit__(self, *args):
         self.logout()
@@ -127,7 +126,7 @@ class SQVD(object):
         self.session = requests.Session()
         self.session.headers.update(
             {"X-Auth-Token": auth['authToken'], "X-User-Id": auth['userId']})
-        return True
+        return self
 
     def logout(self):
         """Closes the session, logs out and unsets userid
