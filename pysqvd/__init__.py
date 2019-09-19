@@ -34,7 +34,11 @@ def safeKeys(iterable):
     """
     if type(iterable) is dict:
         for key in iterable.keys():
-            newKey = key.replace('.', '-').replace('$', '£')
+            try:
+                newKey = key.replace('.', '-').replace('$', '£')
+            except:
+                print('?',key)
+                raise
             iterable[newKey] = iterable.pop(key)
             if type(iterable[newKey]) is dict or type(iterable[newKey]) is list:
                 iterable[newKey] = safeKeys(iterable[newKey])
