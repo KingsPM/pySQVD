@@ -37,7 +37,7 @@ def safeKeys(iterable):
             try:
                 newKey = key.replace('.', '-').replace('$', '£')
             except:
-                print('?',key)
+                print('?',key,type(key))
                 raise
             iterable[newKey] = iterable.pop(key)
             if type(iterable[newKey]) is dict or type(iterable[newKey]) is list:
