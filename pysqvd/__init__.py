@@ -34,11 +34,7 @@ def safeKeys(iterable):
     """
     if type(iterable) is dict:
         for key in iterable.keys():
-            try:
-                newKey = str(key).replace('.', '-').replace('$', '£')
-            except:
-                print('?',key,type(key))
-                raise
+            newKey = str(key).replace('.', '-').replace('$', '£')
             iterable[newKey] = iterable.pop(key)
             if type(iterable[newKey]) is dict or type(iterable[newKey]) is list:
                 iterable[newKey] = safeKeys(iterable[newKey])
@@ -302,9 +298,8 @@ class SQVD(object):
                 m = re.search(r'\.(.[^\.]+)(\.gz)?$', fi)
                 if m:
                     filetype = m.group(1)
-                    if os.path.isfile(fi) and m and filetype in ['vcf', 'bed', 'bedgraph', 'bam', 'pdf']:
-                        url = '/'.join([self.url, 'study',
-                                        study['data'][0]['_id'], filetype])
+                    if os.path.isfile(fi) and m and filetype in ['vcf', 'bed', 'bedgraph', 'bam', 'pdf', 'json']:
+                        url = '/'.join([self.url, 'study', study['data'][0]['_id'], filetype])
                         # set query parameters
                         # add filename
                         url += '?%s' % (
