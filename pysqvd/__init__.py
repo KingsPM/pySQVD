@@ -35,7 +35,7 @@ def safeKeys(iterable):
     if type(iterable) is dict:
         for key in iterable.keys():
             try:
-                newKey = key.replace('.', '-').replace('$', '£')
+                newKey = str(key).replace('.', '-').replace('$', '£')
             except:
                 print('?',key,type(key))
                 raise
