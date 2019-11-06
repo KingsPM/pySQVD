@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 from __future__ import print_function
 from six import string_types
 from six.moves.urllib.parse import urlencode
@@ -184,7 +185,7 @@ class SQVD(object):
             return r.json()
 
     def createStudy(self, x, find=False):
-        """Creates a new study and sample if doesnt exist, validates track and panel
+        """Creates a new dataset, study and sample if doesnt exist, validates track and panel
 
         :param x: Dictionary with study/sample information.
         :type x: dict -- [study_name, sample_id, panel_id, panel_version, workflow, subpanels, group]
@@ -267,6 +268,30 @@ class SQVD(object):
         else:
             newstudy["sample_id"] = _id
 
+        # create dataset or get _id
+        if x['dataset_name']:
+            dataset_data = {
+                "name": x["dataset_name"],
+                "group": x["group"]
+            }
+            # get dataset
+            try:
+                dataset = self.rest('dataset', data=dataset_data)
+                assert len(dataset['data']) <= 1
+            except AssertionError:
+                raise ApiError('ambiguous dataset name')
+            except:
+                raise
+
+            # create dataset
+            if not dataset['data']:
+                dataset_data['createdBy'] = self.userid
+                _id = self.rest('dataset', 'POST', data=dataset_data)['data']['_id']
+                newstudy['dataset_id'] = _id
+            else:
+                newstudy['dataset_id'] = dataset['data'][0]['_id']
+
+        # return created studies
         return self.rest('study', 'POST', newstudy)['data']
 
     def upload(self, files, study_name, parse=True):
@@ -327,7 +352,7 @@ class SQVD(object):
 
 if __name__ == "__main__":
     import sys
-    if (len(sys.argv) < 4):
+    if (len(sys.argv) < 3):
         print('test with USERNAME PASSWORD VCF as arguments')
         sys.exit(1)
 
@@ -346,7 +371,7 @@ if __name__ == "__main__":
             "sample_id": "XXXXXX",
             "panel_id": "XXXXXX",
             "subpanels": [],
-            "group": "molpath",
+            "group": "precmed",
             "requested": "2018-03-26T08:11:49Z",
             "reportdue": "2018-03-28T23:00:00Z",
             "track_id": "SOMATIC",
@@ -371,13 +396,14 @@ if __name__ == "__main__":
         print('DELETE:', len(
             sqvd.rest('study', 'DELETE', study['data'][0]['_id'])['data']))
 
-        # create study
+        # create study (ensures samples and dataset exist and validated panel and workflow)
         obj = {
             'study_name': 'apitest',
+            'dataset_name': 'apitest',
             'sample_id': 'apitest',
             'panel_id': 'TEST',
             'panel_version': 1,
-            'workflow': 'somatic',
+            'workflow': 'dna_somatic',
             'subpanels': ['FULL'],
             'group': 'precmed'
         }
@@ -385,9 +411,11 @@ if __name__ == "__main__":
         print('CREATED STUDY/SAMPLE:', study['_id'], study['sample_id'])
 
         # test upload
-        uploaded = sqvd.upload(sys.argv[3:], 'apitest')
-        print('UPLOADED:', len(uploaded))
+        if len(sys.argv) > 3:
+            uploaded = sqvd.upload(sys.argv[3:], 'apitest')
+            print('UPLOADED:', len(uploaded))
 
         # remove study and sample
         sqvd.rest('study', 'DELETE', study['_id'])
         sqvd.rest('sample', 'DELETE', study['sample_id'])
+        sqvd.rest('dataset', 'DELETE', study['dataset_id'])
