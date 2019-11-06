@@ -1,8 +1,8 @@
 from setuptools import setup
 
 setup(name='pysqvd',
-  version='1.0.0',
-  description='Python convenience API for SQVD',
+  version='1.1.0',
+  description='Python API library for SQVD',
   url='http://github.com/preciserobot/sqvd',
   author='David Brawand',
   author_email='dbrawand@nhs.net',
@@ -13,5 +13,3 @@ setup(name='pysqvd',
     "six"
   ],
   zip_safe=False)
-
-
