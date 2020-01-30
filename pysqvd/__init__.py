@@ -150,7 +150,7 @@ class SQVD(object):
         """
         if response.status_code in [200]:
             return True
-        raise ApiError(response.reason)
+        raise ApiError(response.text)
 
     def rest(self, collection, op='GET', data=None, json=None):
         """This function does something.
@@ -369,7 +369,7 @@ if __name__ == "__main__":
         data = {
             "study_name": "XXXXXX",
             "sample_id": "XXXXXX",
-            "panel_id": "XXXXXX",
+            "panel_id": "XXXX",
             "subpanels": [],
             "group": "precmed",
             "requested": "2018-03-26T08:11:49Z",
@@ -401,11 +401,11 @@ if __name__ == "__main__":
             'study_name': 'apitest',
             'dataset_name': 'apitest',
             'sample_id': 'apitest',
-            'panel_id': 'TEST',
-            'panel_version': 1,
-            'workflow': 'dna_somatic',
-            'subpanels': ['FULL'],
-            'group': 'precmed'
+            'panel_id': 'RCGP',
+            'panel_version': 4,
+            'workflow': 'dna_germline',
+            'subpanels': [],
+            'group': 'molpath'
         }
         study = sqvd.createStudy(obj)
         print('CREATED STUDY/SAMPLE:', study['_id'], study['sample_id'])
@@ -419,3 +419,5 @@ if __name__ == "__main__":
         sqvd.rest('study', 'DELETE', study['_id'])
         sqvd.rest('sample', 'DELETE', study['sample_id'])
         sqvd.rest('dataset', 'DELETE', study['dataset_id'])
+        print("BYE")
+
