@@ -212,7 +212,10 @@ class SQVD(object):
             assert len(panel['data']) == 1
             assert set(x['subpanels']) <= set(
                 map(lambda x: x['subpanel_id'], panel['data'][0]['subpanels']))
-            duedate = weekdaysFromNow(int(panel['data'][0]['tat']))
+            try:
+                duedate = weekdaysFromNow(int(panel['data'][0]['tat']))
+            except:
+                duedate = weekdaysFromNow(0)
         except AssertionError:
             raise ApiError('panel or subpanels not found')
         except:
