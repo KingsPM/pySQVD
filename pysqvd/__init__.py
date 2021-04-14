@@ -185,7 +185,7 @@ class SQVD(object):
             return r.json()
 
     def createStudy(self, x, find=False):
-        """Creates a new dataset, study and sample if doesnt exist, validates track and panel
+        """Creates a new dataset, study and single sample if doesnt exist, validates track and panel
 
         :param x: Dictionary with study/sample information.
         :type x: dict -- [study_name, sample_id, panel_id, panel_version, workflow, subpanels, group]
@@ -269,7 +269,7 @@ class SQVD(object):
         except:
             raise
         else:
-            newstudy["sample_id"] = _id
+            newstudy["sample_ids"] = [ _id ]
 
         # create dataset or get _id
         if x['dataset_name']:
@@ -371,7 +371,7 @@ if __name__ == "__main__":
         # post study
         data = {
             "study_name": "XXXXXX",
-            "sample_id": "XXXXXX",
+            "sample_ids": ["XXXXXX"],
             "panel_id": "XXXX",
             "subpanels": [],
             "group": "precmed",
@@ -383,7 +383,7 @@ if __name__ == "__main__":
         study = sqvd.rest('study', 'POST', data)
         print('CREATED STUDY:', study['data']['_id'])
 
-        # show sample count
+        # show study count
         print("STUDYCOUNT:", len(sqvd.rest('study')['data']))
 
         # get document
@@ -411,7 +411,7 @@ if __name__ == "__main__":
             'group': 'molpath'
         }
         study = sqvd.createStudy(obj)
-        print('CREATED STUDY/SAMPLE:', study['_id'], study['sample_id'])
+        print('CREATED STUDY/SAMPLE:', study['_id'], study['sample_ids'])
 
         # test upload
         if len(sys.argv) > 3:
@@ -420,7 +420,7 @@ if __name__ == "__main__":
 
         # remove study and sample
         sqvd.rest('study', 'DELETE', study['_id'])
-        sqvd.rest('sample', 'DELETE', study['sample_id'])
         sqvd.rest('dataset', 'DELETE', study['dataset_id'])
+        for sample_id in study['sample_ids']:
+            sqvd.rest('sample', 'DELETE', sample_id)
         print("BYE")
-
