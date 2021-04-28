@@ -185,7 +185,7 @@ class SQVD(object):
             return r.json()
 
     def createStudy(self, x, find=False):
-        """Creates a new dataset, study and sample if doesnt exist, validates track and panel
+        """Creates a new dataset, study and single sample if doesnt exist, validates track and panel
 
         :param x: Dictionary with study/sample information.
         :type x: dict -- [study_name, sample_id, panel_id, panel_version, workflow, subpanels, group]
@@ -199,7 +199,6 @@ class SQVD(object):
         newstudy = {
             'study_name': x['study_name'],
             "subpanels": x['subpanels'],
-            "group": x["group"],
             "createdBy": self.userid,
             'requested': now.isoformat()
         }
@@ -212,7 +211,10 @@ class SQVD(object):
             assert len(panel['data']) == 1
             assert set(x['subpanels']) <= set(
                 map(lambda x: x['subpanel_id'], panel['data'][0]['subpanels']))
-            duedate = weekdaysFromNow(int(panel['data'][0]['tat']))
+            try:
+                duedate = weekdaysFromNow(int(panel['data'][0]['tat']))
+            except:
+                duedate = weekdaysFromNow(0)
         except AssertionError:
             raise ApiError('panel or subpanels not found')
         except:
@@ -221,12 +223,22 @@ class SQVD(object):
             newstudy['panel_id'] = panel['data'][0]['_id']
             newstudy['subpanels'] = x['subpanels']
             newstudy['reportdue'] = duedate.isoformat()
+        
+        # set group if not defined
+        if 'group' in x.keys():
+            newstudy['group'] = x['group']
+        else:
+            newstudy['group'] = panel['data'][0]['group']
+
         # check if track exists
         try:
             track = self.rest('track', data={'name': x['workflow']})
             assert len(track['data']) == 1
         except AssertionError:
             raise ApiError('Workflow not found')
+        except KeyError:
+            # infer from panel
+            newstudy['track_id'] = panel['data'][0]['track_id']
         except:
             raise
         else:
@@ -266,6 +278,8 @@ class SQVD(object):
         except:
             raise
         else:
+            newstudy["sample_ids"] = [ _id ]
+            # for backwards compatibility (pre 1.1.0)
             newstudy["sample_id"] = _id
 
         # create dataset or get _id
@@ -368,7 +382,7 @@ if __name__ == "__main__":
         # post study
         data = {
             "study_name": "XXXXXX",
-            "sample_id": "XXXXXX",
+            "sample_ids": ["XXXXXX"],
             "panel_id": "XXXX",
             "subpanels": [],
             "group": "precmed",
@@ -380,7 +394,7 @@ if __name__ == "__main__":
         study = sqvd.rest('study', 'POST', data)
         print('CREATED STUDY:', study['data']['_id'])
 
-        # show sample count
+        # show study count
         print("STUDYCOUNT:", len(sqvd.rest('study')['data']))
 
         # get document
@@ -408,7 +422,7 @@ if __name__ == "__main__":
             'group': 'molpath'
         }
         study = sqvd.createStudy(obj)
-        print('CREATED STUDY/SAMPLE:', study['_id'], study['sample_id'])
+        print('CREATED STUDY/SAMPLE:', study['_id'], study['sample_ids'])
 
         # test upload
         if len(sys.argv) > 3:
@@ -417,7 +431,7 @@ if __name__ == "__main__":
 
         # remove study and sample
         sqvd.rest('study', 'DELETE', study['_id'])
-        sqvd.rest('sample', 'DELETE', study['sample_id'])
         sqvd.rest('dataset', 'DELETE', study['dataset_id'])
+        for sample_id in study['sample_ids']:
+            sqvd.rest('sample', 'DELETE', sample_id)
         print("BYE")
-
