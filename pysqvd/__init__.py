@@ -199,7 +199,6 @@ class SQVD(object):
         newstudy = {
             'study_name': x['study_name'],
             "subpanels": x['subpanels'],
-            "group": x["group"],
             "createdBy": self.userid,
             'requested': now.isoformat()
         }
@@ -224,12 +223,22 @@ class SQVD(object):
             newstudy['panel_id'] = panel['data'][0]['_id']
             newstudy['subpanels'] = x['subpanels']
             newstudy['reportdue'] = duedate.isoformat()
+        
+        # set group if not defined
+        if 'group' in x.keys():
+            newstudy['group'] = x['group']
+        else:
+            newstudy['group'] = panel['data'][0]['group']
+
         # check if track exists
         try:
             track = self.rest('track', data={'name': x['workflow']})
             assert len(track['data']) == 1
         except AssertionError:
             raise ApiError('Workflow not found')
+        except KeyError:
+            # infer from panel
+            newstudy['track_id'] = panel['data'][0]['track_id']
         except:
             raise
         else:
@@ -270,6 +279,8 @@ class SQVD(object):
             raise
         else:
             newstudy["sample_ids"] = [ _id ]
+            # for backwards compatibility (pre 1.1.0)
+            newstudy["sample_id"] = _id
 
         # create dataset or get _id
         if x['dataset_name']:

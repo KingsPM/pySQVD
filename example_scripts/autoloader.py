@@ -64,6 +64,7 @@ if __name__ == "__main__":
             'subpanels': [],
             'group': 'virtual'
         }
+        print(obj)
         try:
             study = sqvd.createStudy(obj)
             print('CREATED STUDY/SAMPLE:', study['_id'], study['sample_id'])
