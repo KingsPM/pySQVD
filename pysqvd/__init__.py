@@ -75,8 +75,10 @@ class SQVD(object):
         :param version: API version
         :type version: str.
         """
-        self.host = host
-        self.url = 'http://'+"/".join([host, 'api', version])
+        self.protocol = 'http'
+        self.host = self.protocol+'://'+host
+        self.url = "/".join([self.host, 'api', version])
+        self.gql = "/".join([self.host, 'graphql'])
         self.session = None
         self.userid = None
         self.username = username
@@ -125,8 +127,10 @@ class SQVD(object):
             return
         self.userid = auth['userId']
         self.session = requests.Session()
-        self.session.headers.update(
-            {"X-Auth-Token": auth['authToken'], "X-User-Id": auth['userId']})
+        self.session.headers.update({
+            "authorization": auth['authToken'],
+            "X-Auth-Token": auth['authToken'],
+            "X-User-Id": auth['userId']})
         return self
 
     def logout(self):
@@ -308,6 +312,32 @@ class SQVD(object):
         # return created studies
         return self.rest('study', 'POST', newstudy)['data']
 
+    def deleteStudy(self, study_name):
+        """Deletes a study and all associated assets
+        
+        :param study_name: The study name
+        :type study_name: str
+
+        :returns: list
+        :raises: AttributeError, AssertionError, KeyError
+        """
+        # get study
+        study = self.rest('study', data={'study_name': study_name})
+        try:
+            assert len(study['data']) == 1
+        except AssertionError:
+            print('ERROR: found multiple studies named {}'.format(study_name))
+            return
+        except:
+            raise
+        else:
+            # post request
+            study_id = study['data'][0]['_id']
+            query = "mutation { deleteStudy(study_id: \""+study_id+"\") }"
+            r = self.session.request('POST', self.gql, json={ "query": query })
+            if self._checkResponse(r):
+                return r.json()
+
     def upload(self, files, study_name, parse=True):
         """Adds a file to a study (imports VCFs, uploads BEDs)
 
@@ -382,7 +412,8 @@ if __name__ == "__main__":
         # post study
         data = {
             "study_name": "XXXXXX",
-            "sample_ids": ["XXXXXX"],
+            "sample_ids": ["XXXXXX"],  # SQVD v1.1
+            "sample_id": "XXXXXX",  # SQVD v1.0
             "panel_id": "XXXX",
             "subpanels": [],
             "group": "precmed",
@@ -414,24 +445,38 @@ if __name__ == "__main__":
         obj = {
             'study_name': 'apitest',
             'dataset_name': 'apitest',
-            'sample_id': 'apitest',
-            'panel_id': 'RCGP',
-            'panel_version': 4,
-            'workflow': 'dna_germline',
+            'sample_ids': ['apitest'],  # SQVD v1.1+
+            'sample_id': 'apitest',  # SQVD v1.0
+            'panel_id': 'CRCP',
+            'panel_version': 1,
+            'workflow': 'dna_somatic',
             'subpanels': [],
-            'group': 'molpath'
+            'group': 'advdiag'
         }
-        study = sqvd.createStudy(obj)
-        print('CREATED STUDY/SAMPLE:', study['_id'], study['sample_ids'])
+        study = sqvd.createStudy(obj, find=True)
+
+        # get sample_ids
+        sample_ids = [ study.get('sample_id') ]
+        if study.get('sample_ids'):
+            sample_ids += study.get('sample_ids')
+        
+        print('CREATED STUDY:', study['_id'], study['study_name'])
+        print('CREATED SAMPLES:', sample_ids)
 
         # test upload
         if len(sys.argv) > 3:
-            uploaded = sqvd.upload(sys.argv[3:], 'apitest')
+            uploaded = sqvd.upload(sys.argv[3:], study['study_name'])
             print('UPLOADED:', len(uploaded))
+        
+        # remove study and samples
+        print('DELETING after 6s:', study['study_name'])
+        time.sleep(6)
+        result = sqvd.deleteStudy(study['study_name'])
 
-        # remove study and sample
-        sqvd.rest('study', 'DELETE', study['_id'])
-        sqvd.rest('dataset', 'DELETE', study['dataset_id'])
-        for sample_id in study['sample_ids']:
-            sqvd.rest('sample', 'DELETE', sample_id)
+        ## manual deletion via standart REST API
+        # sqvd.rest('study', 'DELETE', study['_id'])
+        # sqvd.rest('dataset', 'DELETE', study['dataset_id'])
+        # for sample_id in sample_ids:
+        #     sqvd.rest('sample', 'DELETE', sample_id)
+
         print("BYE")
