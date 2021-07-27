@@ -60,6 +60,7 @@ def weekdaysFromNow(days):
         days -= 1
     return startdate
 
+FILETYPES = ['vcf', 'bed', 'bedgraph', 'bam', 'pdf', 'json', 'bw']
 
 class SQVD(object):
 
@@ -85,7 +86,13 @@ class SQVD(object):
         self.password = hashlib.sha256(password.encode('utf-8')).hexdigest()
 
     def __enter__(self):
-        return self.login()
+        logged_in = self.login()
+        try:
+            assert logged_in
+        except AssertionError:
+            raise ApiError('Not authenticated, check credentials.')
+        print(logged_in)
+        return logged_in
 
     def __exit__(self, *args):
         self.logout()
@@ -124,6 +131,7 @@ class SQVD(object):
             self._checkResponse(r)
             auth = r.json()['data']
         except:
+            print('ERROR: Cannot login {} to {} '.format(self.username, self.url))
             return
         self.userid = auth['userId']
         self.session = requests.Session()
@@ -367,7 +375,7 @@ class SQVD(object):
                 m = re.search(r'\.(.[^\.]+)(\.gz)?$', fi)
                 if m:
                     filetype = m.group(1)
-                    if os.path.isfile(fi) and m and filetype in ['vcf', 'bed', 'bedgraph', 'bam', 'pdf', 'json']:
+                    if os.path.isfile(fi) and m and filetype in FILETYPES:
                         url = '/'.join([self.url, 'study', study['data'][0]['_id'], filetype])
                         # set query parameters
                         # add filename
@@ -386,8 +394,8 @@ class SQVD(object):
                         if self._checkResponse(r):
                             results.append((fi, r.json()))
                     else:
-                        print('ERROR: {} is not valid file'.format(
-                            os.path.basename(fi)))
+                        print('ERROR: {} is not an accepted file type ({})'.format(
+                            os.path.basename(fi), ', '.join(FILETYPES)))
                 else:
                     print('ERROR: {} is an unsupported format'.format(
                         os.path.basename(fi)))

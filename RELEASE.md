@@ -1,5 +1,10 @@
 # Release Notes - pySQVD
 
+## v1.2.1
+- Added bigWig (bw) as an accepted file type
+- Added some example scripts
+- ApiError if authentication fails
+
 ## v1.2.0
 - Added deleteStudy method using GQL API (also deletes associated samples and assets)
 - Compatibility enhancements with v1.0
