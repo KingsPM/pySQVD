@@ -20,12 +20,14 @@ def main(host, user, passwd, directory, dwell_time):
             p = root[len(directory):].strip('/').split("/")
             if len(p) == 4:
                 # get files
+                jsns = list([f for f in files if f.endswith('.json')])
                 bams = list([f for f in files if f.endswith('.bam')])
                 vcfs = list([f for f in files if f.endswith('.vcf.gz')])
                 beds = list([f for f in files if f.endswith('.bed')])
                 bedg = list([f for f in files if f.endswith('.bedgraph')])
                 bigw = list([f for f in files if f.endswith('.bw')])
-                upload_files = list([f'{root}/{f}' for f in bams + vcfs + beds + bedg + bigw])
+                upload_files = list([f'{root}/{f}' for f in
+                                     jsns + bams + vcfs + beds + bedg + bigw])
                 # get study
                 group, workflow, panel, sample = p
                 m = re.match(r'([A-Za-z]+)(\d+)$', panel)
