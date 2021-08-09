@@ -67,7 +67,7 @@ if __name__ == "__main__":
         assert user and passwd and host
         root = sys.argv[1].rstrip('/')
         assert os.path.isdir(root)
-    except:
+    except Exception:
         print("""
             python dirLoader.py <DIRECTORY>
 
@@ -77,4 +77,10 @@ if __name__ == "__main__":
             Ensure SQVDUSER, SQVDPASS, SQVDHOST env variables are set!
         """)
     else:
-        main(host,user,passwd,root,1)
+        # dwell time between directories
+        dwell = 0
+        try:
+            dwell = int(sys.argv[2])
+        except Exception:
+            pass
+        main(host, user, passwd, root, dwell)

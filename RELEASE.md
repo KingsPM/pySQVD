@@ -4,10 +4,13 @@
 - added capability to skip parser/processor on file upload
 
 ## v1.2.1
-- bugfixes
+- Added bigWig (bw) as an accepted file type
+- Added some example scripts
+- ApiError if authentication fails
 
 ## v1.2.0
-- Compatibility with SQVD v1.1+
+- Added deleteStudy method using GQL API (also deletes associated samples and assets)
+- Compatibility enhancements with v1.0
 
 ## v1.1.1
 - ApiErrors will now display error text instead of simple HTTP error codes
