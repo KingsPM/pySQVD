@@ -1,5 +1,14 @@
 # Release Notes - pySQVD
 
+## v1.2.2
+- added capability to skip parser/processor on file upload
+
+## v1.2.1
+- bugfixes
+
+## v1.2.0
+- Compatibility with SQVD v1.1+
+
 ## v1.1.1
 - ApiErrors will now display error text instead of simple HTTP error codes
 

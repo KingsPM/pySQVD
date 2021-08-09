@@ -308,15 +308,15 @@ class SQVD(object):
         # return created studies
         return self.rest('study', 'POST', newstudy)['data']
 
-    def upload(self, files, study_name, parse=True):
+    def upload(self, files, study_name, options={"import": "true"}):
         """Adds a file to a study (imports VCFs, uploads BEDs)
 
         :param files: file paths
         :type files: [str]
         :param study_name: The study name
         :type study_name: str
-        :param parse: parse/import the added file
-        :type parse: bool
+        :param options: parameters to control downstream processing
+        :type options: dict
 
         :returns: list of tuples (file, json response)
         :raises: AttributeError, AssertionError, KeyError
@@ -337,13 +337,15 @@ class SQVD(object):
                 m = re.search(r'\.(.[^\.]+)(\.gz)?$', fi)
                 if m:
                     filetype = m.group(1)
-                    if os.path.isfile(fi) and m and filetype in ['vcf', 'bed', 'bedgraph', 'bam', 'pdf', 'json']:
+                    if os.path.isfile(fi) and m and filetype in ['vcf', 'bed', 'bw', 'bedgraph', 'bam', 'pdf', 'json']:
                         url = '/'.join([self.url, 'study', study['data'][0]['_id'], filetype])
                         # set query parameters
                         # add filename
                         url += '?%s' % (
                             urlencode({'filename': fi.split('/')[-1]}))
-                        url += '&import=true' if parse else ''  # import all recognised files
+                        # URL parameters (parsing and processing options)
+                        for opt in options.keys():
+                            url += f"&{opt}={options[opt]}"  # import all recognised files
                         # read file
                         with open(fi, 'rb') as fh:
                             data = fh.read()
