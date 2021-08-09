@@ -49,10 +49,15 @@ As default, all parsers and file processors will run and processed files will be
 Specific steps can be skipped by supplying keywords
 (eg. `http://localhost:3000/api/v1/study/9zu9BHRGZH2DNSLde/vcf?skip=parser`).
 
-keyword    | Step       | File types       | Description
----------- | ---------- | ---------------- | -------
-parser     | parser     | VCF,BAM, BED, BW | Skips any parsing steps
-bigwig     | processing | BAM              | prevents generation of BIGWIG file
+keyword    | Step           | File types       | Description
+---------- | -------------- | ---------------- | -------
+parsing    | parser         | VCF,BAM, BED, BW | Skips any parsing steps
+processing | postprocessing | VCF,BAM, BED, BW | Skips all postprocessing
+storing    | storage        | VCF,BAM, BED, BW | Skips move to GridFS storage
+bw         | processing     | BAM              | prevents generation of BIGWIG file
+bai        | processing     | BAM              | prevents indexing of BAM file
+chromsizes | processing     | BAM              | prevents generation of chromsizes (bw depends on this!)
+tbi        | processing     | VCF              | prevents indexing of VCF file
 
 You can assign a data type to each uploaded file with the `type` query parameter. This is useful if multiple BED files are uploaded.
 

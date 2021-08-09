@@ -1,11 +1,7 @@
 from setuptools import setup
 
 setup(name='pysqvd',
-<<<<<<< HEAD
   version='1.2.2',
-=======
-  version='1.2.1',
->>>>>>> master
   description='Python API library for SQVD',
   url='http://github.com/preciserobot/sqvd',
   author='David Brawand',
