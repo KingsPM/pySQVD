@@ -334,7 +334,8 @@ class SQVD(object):
         try:
             assert len(study['data']) == 1
         except AssertionError:
-            print('ERROR: found multiple studies named {}'.format(study_name))
+            study_count = len(study['data'])
+            print(f'ERROR: found none/multiple studies ({study_count}) named {study_name}')
             return
         except:
             raise

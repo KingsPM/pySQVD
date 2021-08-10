@@ -49,7 +49,7 @@ def main(host, user, passwd, directory, dwell_time):
                     # create or fetch study (by name)
                     try:
                         study = sqvd.createStudy(study_object)
-                        sqvd.upload(upload_files, study_name, {"skip": "bw,storing"})
+                        sqvd.upload(upload_files, study_name, {"skip": "bw"})
                         print(f'Uploaded {len(upload_files)} files for {study_name}')
                     except:
                         studies = sqvd.rest('study', data={'study_name': study_name})
