@@ -47,7 +47,7 @@ The upload endpoints do not automatically parse and import the files into the da
 As default, all parsers and file processors will run and processed files will be moved into storage (GridFS).
 
 Specific steps can be skipped by supplying keywords
-(eg. `http://localhost:3000/api/v1/study/9zu9BHRGZH2DNSLde/vcf?skip=parser`).
+(eg. `http://localhost:3000/api/v1/study/9zu9BHRGZH2DNSLde/vcf?skip=parsing`).
 
 keyword    | Step           | File types       | Description
 ---------- | -------------- | ---------------- | -------
