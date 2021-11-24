@@ -26,8 +26,9 @@ def main(host, user, passwd, directory, dwell_time):
                 beds = list([f for f in files if f.endswith('.bed')])
                 bedg = list([f for f in files if f.endswith('.bedgraph')])
                 bigw = list([f for f in files if f.endswith('.bw')])
+                pdfs = list([f for f in files if f.endswith('.pdf')])
                 upload_files = list([f'{root}/{f}' for f in
-                                     jsns + bams + vcfs + beds + bedg + bigw])
+                                     jsns + bams + vcfs + beds + bedg + bigw + pdfs])
                 # get study
                 group, workflow, panel, sample = p
                 m = re.match(r'([A-Za-z]+)(\d+)$', panel)
@@ -49,7 +50,7 @@ def main(host, user, passwd, directory, dwell_time):
                     # create or fetch study (by name)
                     try:
                         study = sqvd.createStudy(study_object)
-                        sqvd.upload(upload_files, study_name, {"skip": "bw"})
+                        sqvd.upload(upload_files, study_name, {"skip": "processing"})
                         print(f'Uploaded {len(upload_files)} files for {study_name}')
                     except:
                         studies = sqvd.rest('study', data={'study_name': study_name})

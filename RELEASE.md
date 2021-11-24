@@ -1,5 +1,8 @@
 # Release Notes - pySQVD
 
+## v1.2.4a
+- Readme update only
+
 ## v1.2.4
 - Minor code change to maintain Python2 compatibility
 
