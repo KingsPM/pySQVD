@@ -122,7 +122,7 @@ JSON file uploads must contain an array of either:
 ]
 ```
 
-The latter is ideal to serve large resources that do not need any processing by SQVD. They can for example be served with `python3 -m http.server 8000`.
+The latter is ideal to serve large resources that do not need any processing by SQVD. They can for example be served with `python3 -m http.server 8000` or `npx http-server -p 8000`.
 
 
 ### Limitations
