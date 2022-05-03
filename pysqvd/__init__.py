@@ -60,7 +60,7 @@ def weekdaysFromNow(days):
         days -= 1
     return startdate
 
-FILETYPES = ['vcf', 'bed', 'bedgraph', 'bam', 'pdf', 'json', 'bw']
+FILETYPES = ['vcf', 'bed', 'bedgraph', 'bam', 'pdf', 'json', 'bw', 'tsv', 'txt']
 
 class SQVD(object):
 
