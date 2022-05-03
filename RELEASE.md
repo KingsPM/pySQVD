@@ -1,5 +1,15 @@
 # Release Notes - pySQVD
 
+## v1.2.4a
+- Readme update only
+
+## v1.2.4
+- Minor code change to maintain Python2 compatibility
+
+## v1.2.3
+- added stress testing script
+- improved logging when a case is not found
+ 
 ## v1.2.2
 - added capability to skip parser/processor on file upload
 

@@ -334,7 +334,8 @@ class SQVD(object):
         try:
             assert len(study['data']) == 1
         except AssertionError:
-            print('ERROR: found multiple studies named {}'.format(study_name))
+            study_count = len(study['data'])
+            print('ERROR: found none/multiple studies ({}) named {}'.format(study_count, study_name))
             return
         except:
             raise
@@ -383,7 +384,7 @@ class SQVD(object):
                             urlencode({'filename': fi.split('/')[-1]}))
                         # URL parameters (parsing and processing options)
                         for opt in options.keys():
-                            url += f"&{opt}={options[opt]}"  # import all recognised files
+                            url += '&{}={}'.format(opt, options[opt])  # import all recognised files
                         # read file
                         with open(fi, 'rb') as fh:
                             data = fh.read()
