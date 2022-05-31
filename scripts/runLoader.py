@@ -2,6 +2,7 @@ import os
 import re
 import sys
 import time
+import json
 from pysqvd import SQVD
 from collections import defaultdict
 '''
@@ -19,7 +20,7 @@ FILE_PATTERNS = (
     re.compile(r'.{8}\.dupemk\.bam$'),  # BAM
     re.compile(r'.{8}\.coverage\.bedgraph$'),  # BEDGRAPH
     re.compile(r'.{8}\.exomedepth\.pdf$'),  # CNV REPORT
-    re.compile(r'.{8}\.metricsreport\.pdf$') # METRICS REPORT
+    re.compile(r'.{8}\.metricsreport\.pdf$'), # METRICS REPORT
 )
 
 def isComplete(files,expected):
@@ -37,54 +38,62 @@ def compress_vcf(file):
     return file
 
 def main(host, user, passwd, directory, dwell_time):
-    sample_files = defaultdict(list)
-    
     # find files to upload
+    sample_files = defaultdict(list)
+    sample_study = {}
     for root, dirs, files in os.walk(directory, topdown=False):
         p = root[len(directory):].strip('/').split("/")
         if len(p) >= 2 and p[1] == RUNID:
             sample = p[0]
+            # extract panel information and build study object
+            if '.config.json' in files and not os.path.islink(os.path.join(root,'.config.json')):
+                with open(os.path.join(root, '.config.json')) as f:
+                    config = json.load(f)
+                    panel = config['ngsAnalysis'].upper()
+                    m = re.match(r'^([A-Z]+)(\d+)$',panel)
+                    if m:
+                        panel_id, panel_version = m.groups()
+                        sample_study[sample] = {
+                            'study_name': f'{sample}_{panel_id}{panel_version}',
+                            'sample_id': sample,
+                            'panel_id': panel_id,
+                            'panel_version': int(panel_version),
+                            'workflow': WORKFLOW,
+                            'subpanels': [],
+                            'group': GROUP,
+                            'dataset_name': ""
+                        }
+            # match files to upload 
             for f in files:
                 for i, pattern in enumerate(FILE_PATTERNS):
                     if pattern.match(f):
-                        sample_files[sample].append((i, os.path.join(root,f)))
-                        break
-
+                        filepath = os.path.join(root,f)
+                        if not os.path.islink(filepath):
+                            sample_files[sample].append((i, filepath))
+                            break
     print(sample_files)
-
+    print(sample_study)
+    
     # automatically logs in and out
     with SQVD(username=user, password=passwd, host=host) as sqvd:
         for sample in sample_files:
-            print(sample)
+            print('Processing',sample)
             upload_files = sample_files[sample]
             # check completeness
-            if isComplete(upload_files, len(FILE_PATTERNS)):
-                # get study
-                # create study object
-                study_name = f'{sample}_{PANEL_ID}{PANEL_VERSION}'
-                study_object = {
-                    'study_name': study_name,
-                    'sample_id': sample,
-                    'panel_id': PANEL_ID,
-                    'panel_version': int(PANEL_VERSION),
-                    'workflow': WORKFLOW,
-                    'subpanels': [],
-                    'group': GROUP,
-                    'dataset_name': ""
-                }
-                print(f"## {study_name} ({len(upload_files)} files)")
-                
+            if isComplete(upload_files, len(FILE_PATTERNS)) and sample in sample_study.keys():
+                study_object = sample_study[sample]
+                print(f"## {study_object['study_name']} ({len(upload_files)} files)")
                 # create or fetch study (by name)
-                studies = sqvd.rest('study', data={'study_name': study_name})
+                studies = sqvd.rest('study', data={'study_name': study_object['study_name']})
                 if len(studies['data']):
-                    print(f"Study {study_name} already exists! -> Skipping")
+                    print(f"Study {study_object['study_name']} already exists! -> Skipping")
                 else:
                     # create study
                     study = sqvd.createStudy(study_object)
                     files_to_upload = list(map(lambda x: compress_vcf(x[1]), upload_files))
                     print(files_to_upload)
-                    sqvd.upload(files_to_upload, study_name, {"skip": "processing"})
-                    print(f'Uploaded {len(upload_files)} files for {study_name}')
+                    sqvd.upload(files_to_upload, study_object['study_name'], {"skip": "processing"})
+                    print(f"Uploaded {len(upload_files)} files for {study_object['study_name']}")
                 time.sleep(dwell_time)
 
 
