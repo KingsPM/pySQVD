@@ -60,7 +60,7 @@ def weekdaysFromNow(days):
         days -= 1
     return startdate
 
-FILETYPES = ['vcf', 'bed', 'bedgraph', 'bam', 'pdf', 'json', 'bw', 'tsv', 'txt']
+FILETYPES = ['vcf', 'bed', 'bedgraph', 'bam', 'pdf', 'json', 'bw', , 'csv', 'tsv', 'txt']
 
 class SQVD(object):
 
@@ -235,7 +235,7 @@ class SQVD(object):
             newstudy['panel_id'] = panel['data'][0]['_id']
             newstudy['subpanels'] = x['subpanels']
             newstudy['reportdue'] = duedate.isoformat()
-        
+
         # set group if not defined
         if 'group' in x.keys():
             newstudy['group'] = x['group']
@@ -322,7 +322,7 @@ class SQVD(object):
 
     def deleteStudy(self, study_name):
         """Deletes a study and all associated assets
-        
+
         :param study_name: The study name
         :type study_name: str
 
@@ -470,7 +470,7 @@ if __name__ == "__main__":
         sample_ids = [ study.get('sample_id') ]
         if study.get('sample_ids'):
             sample_ids += study.get('sample_ids')
-        
+
         print('CREATED STUDY:', study['_id'], study['study_name'])
         print('CREATED SAMPLES:', sample_ids)
 
@@ -478,7 +478,7 @@ if __name__ == "__main__":
         if len(sys.argv) > 3:
             uploaded = sqvd.upload(sys.argv[3:], study['study_name'])
             print('UPLOADED:', len(uploaded))
-        
+
         # remove study and samples
         print('DELETING after 6s:', study['study_name'])
         time.sleep(6)
