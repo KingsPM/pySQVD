@@ -10,11 +10,11 @@ Simple loading script from directory structure of snappy v3.x.x (rcgp)
 RUNFOLDER/<sample>/<RUNID>/BAM+VCF+BEDGRAPH
 '''
 
-GROUP = "molpath"
-RUNID = "default"
-PANEL_ID = "RCGP"
-PANEL_VERSION = "4"
-WORKFLOW = "dna_germline"
+GROUP = os.environ.get("GROUP", default="molpath")
+RUNID = os.environ.get("RUNID", default="watchdog")
+PANEL_ID = os.environ.get("PANEL_ID", default="RCGP")
+PANEL_VERSION = os.environ.get("PANEL_VERSION", default="5")
+WORKFLOW = os.environ.get("WORKFLOW", default="dna_germline")
 FILE_PATTERNS = (
     re.compile(r'.{8}\.merged\.vcf$'),  # VCF
     re.compile(r'.{8}\.dupemk\.bam$'),  # BAM
