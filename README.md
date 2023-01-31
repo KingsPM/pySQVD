@@ -182,3 +182,21 @@ Upload VCF file and assign to study:
 ```
 curl -X POST -H "X-User-Id: JDPqFBtgzWRZvMRiv" -H "X-Auth-Token: XI-KvLyHDLCNx9gpXfdR5eVySht2J2mPXBbf5mj_m05" -H "Content-Type: application/gz" --data-binary "@../../web/imports/api/assets/data/cancer.vcf.gz" http://localhost:3000/api/v1/study/9zu9BHRGZH2DNSLde/vcf
 ```
+
+### Helper scripts
+Upload to SQVD can also be achieved using the helper scripts provided. 
+
+`runLoader.py` allows uploading results from [snappy](https://git.kingspm.uk/kingspm/snappy) secondary analysis workflows. It can easily be run from within the docker container that wraps pySQVD and all dependecies. For example:
+
+```
+docker run -it --rm \
+-e SQVDHOST=192.168.1.10/sqvd \
+-e SQVDUSER=apiuser \
+-e SQVDPASS=password \
+-e GROUP=molpath \
+-e PANEL_ID=RCGP \
+-e PANEL_VERSION=5 \
+-v /path/to/runfolder:/data \
+seglh/pysqvd:molpath /data
+```
+

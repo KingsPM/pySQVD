@@ -20,15 +20,17 @@ FILE_PATTERNS = (
     re.compile(r'.{8}\.dupemk\.bam$'),  # BAM
     re.compile(r'.{8}\.coverage\.bedgraph$'),  # BEDGRAPH
     re.compile(r'.{8}\.exomedepth\.pdf$'),  # CNV REPORT
-    re.compile(r'.{8}\.metricsreport\.pdf$'), # METRICS REPORT
+    re.compile(r'.{8}\.metricsreport\.pdf$'),  # METRICS REPORT
 )
 
-def isComplete(files,expected):
+
+def isComplete(files, expected):
     missed_ids = list(range(expected))
-    for i,f in files:
+    for i, f in files:
         if i in missed_ids:
             missed_ids.remove(i)
     return not missed_ids
+
 
 def compress_vcf(file):
     if file.endswith('.vcf'):
@@ -36,6 +38,7 @@ def compress_vcf(file):
         os.system(" ".join(["bgzip -c", file, ">", newfile]))
         return newfile
     return file
+
 
 def main(host, user, passwd, directory, dwell_time):
     # find files to upload
@@ -46,11 +49,13 @@ def main(host, user, passwd, directory, dwell_time):
         if len(p) >= 2 and p[1] == RUNID:
             sample = p[0]
             # extract panel information and build study object
-            if '.config.json' in files and not os.path.islink(os.path.join(root,'.config.json')):
+            if '.config.json' in files and \
+                    not os.path.islink(os.path.join(root, '.config.json')):
+                print('Found sample: {}'.format(sample))
                 with open(os.path.join(root, '.config.json')) as f:
                     config = json.load(f)
                     panel = config['ngsAnalysis'].upper()
-                    m = re.match(r'^([A-Z]+)(\d+)$',panel)
+                    m = re.match(r'^([A-Z]+)(\d+)$', panel)
                     if m:
                         panel_id, panel_version = m.groups()
                         sample_study[sample] = {
@@ -63,21 +68,22 @@ def main(host, user, passwd, directory, dwell_time):
                             'group': GROUP,
                             'dataset_name': ""
                         }
-            # match files to upload 
+            # match files to upload
             for f in files:
                 for i, pattern in enumerate(FILE_PATTERNS):
                     if pattern.match(f):
-                        filepath = os.path.join(root,f)
+                        print(f'Found file: {f}')
+                        filepath = os.path.join(root, f)
                         if not os.path.islink(filepath):
                             sample_files[sample].append((i, filepath))
                             break
     print(sample_files)
     print(sample_study)
-    
+
     # automatically logs in and out
     with SQVD(username=user, password=passwd, host=host) as sqvd:
         for sample in sample_files:
-            print('Processing',sample)
+            print('Processing', sample)
             upload_files = sample_files[sample]
             # check completeness
             if isComplete(upload_files, len(FILE_PATTERNS)) and sample in sample_study.keys():
@@ -90,11 +96,14 @@ def main(host, user, passwd, directory, dwell_time):
                 else:
                     # create study
                     study = sqvd.createStudy(study_object)
+                    print("Created study", study['study_name'])
                     files_to_upload = list(map(lambda x: compress_vcf(x[1]), upload_files))
                     print(files_to_upload)
-                    sqvd.upload(files_to_upload, study_object['study_name'], {"skip": "processing"})
+                    sqvd.upload(files_to_upload, study_object['study_name'], {"skip": "chromsizes,bw"})
                     print(f"Uploaded {len(upload_files)} files for {study_object['study_name']}")
                 time.sleep(dwell_time)
+            else:
+                print('Not all files available for {}'.format(sample))
 
 
 if __name__ == "__main__":
@@ -114,7 +123,7 @@ if __name__ == "__main__":
 
             The directory structure must follow snappy's conventions.
             The dwell time specifies how long to wait between uploads. (default: 0s)
-            
+
             Ensure SQVDUSER, SQVDPASS, SQVDHOST env variables are set!
         """)
     else:
