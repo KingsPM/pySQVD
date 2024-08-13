@@ -129,7 +129,7 @@ class SQVD(object):
 
         try:
             self._checkResponse(r)
-            auth = r.json()
+            auth = r.json()['data']
         except:
             print('ERROR: Cannot login {} to {} '.format(self.username, self.url))
             return
