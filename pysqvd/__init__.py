@@ -388,8 +388,8 @@ class SQVD(object):
                         # read file
                         # local file
                         if os.path.isfile(fi):
-                            with open(response, 'rb') as fh:
-                                data = fh.write(r.content)
+                            with open(fi, 'rb') as fh:
+                                data = fh.read()
                         # remote file
                         else:
                             response = requests.get(fi)
