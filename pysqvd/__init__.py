@@ -376,7 +376,7 @@ class SQVD(object):
                 m = re.search(r'\.(.[^\.]+)(\.gz)?$', fi)
                 if m:
                     filetype = m.group(1)
-                    if os.path.isfile(fi) and m and filetype in FILETYPES:
+                    if m and filetype in FILETYPES:
                         url = '/'.join([self.url, 'study', study['data'][0]['_id'], filetype])
                         # set query parameters
                         # add filename
@@ -386,8 +386,15 @@ class SQVD(object):
                         for opt in options.keys():
                             url += '&{}={}'.format(opt, options[opt])  # import all recognised files
                         # read file
-                        with open(fi, 'rb') as fh:
-                            data = fh.read()
+                        # local file
+                        if os.path.isfile(fi):
+                            with open(fi, 'rb') as fh:
+                                data = fh.read()
+                        # remote file
+                        else:
+                            response = requests.get(fi)
+                            data = response.content
+                        
                         # post request
                         r = self.session.request('POST',
                                                  url,
